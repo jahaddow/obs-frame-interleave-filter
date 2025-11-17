@@ -26,6 +26,11 @@ OBS_MODULE_USE_DEFAULT_LOCALE(PLUGIN_NAME, "en-US")
 
 extern const struct obs_source_info frame_interleave_filter_info;
 
+const char *obs_module_name(void)
+{
+	return obs_module_text("Module.Name");
+}
+
 bool obs_module_load(void)
 {
 	obs_register_source(&frame_interleave_filter_info);

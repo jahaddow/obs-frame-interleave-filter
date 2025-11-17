@@ -37,8 +37,3 @@ bool obs_module_load(void)
 	blog(LOG_INFO, "plugin loaded (version %s)", PLUGIN_VERSION);
 	return true;
 }
-
-void obs_module_unload()
-{
-	blog(LOG_INFO, "plugin unloaded");
-}

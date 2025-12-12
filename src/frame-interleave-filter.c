@@ -51,7 +51,7 @@ static struct obs_source_frame *filter_video(void *data, struct obs_source_frame
 	uint64_t ns = obs_get_video_frame_time();
 	obs_source_t *parent = obs_filter_get_parent(f->context);
 
-	if (obs_source_active(parent) || !f->next_ns || ns >= f->next_ns) {
+	if (!f->next_ns || ns >= f->next_ns) {
 		if (!f->next_ns || ns - f->next_ns > f->interleave_ns * 2)
 			f->next_ns = ns + f->interleave_ns;
 		else

@@ -33,7 +33,8 @@ struct frame_interleave_s
 
 static void reset_schedule(struct frame_interleave_s *f)
 {
-	f->next_ns = 0;
+	if (f->next_ns)
+		f->next_ns = 0;
 }
 
 static const char *get_name(void *type_data)
@@ -73,8 +74,12 @@ static struct obs_source_frame *filter_video(void *data, struct obs_source_frame
 		return frame;
 	}
 
+	if (!f->interleave_ns) {
+		reset_schedule(f);
+		return frame;
+	}
+
 	uint64_t ns = obs_get_video_frame_time();
-	obs_source_t *parent = obs_filter_get_parent(f->context);
 
 	if (!f->next_ns || ns >= f->next_ns) {
 		if (!f->next_ns || ns - f->next_ns > f->interleave_ns * 2)
@@ -84,6 +89,7 @@ static struct obs_source_frame *filter_video(void *data, struct obs_source_frame
 		return frame;
 	}
 
+	obs_source_t *parent = obs_filter_get_parent(f->context);
 	obs_source_release_frame(parent, frame);
 	return NULL;
 }

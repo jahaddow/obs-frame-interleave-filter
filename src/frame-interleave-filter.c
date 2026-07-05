@@ -31,6 +31,11 @@ struct frame_interleave_s
 	uint64_t next_ns;
 };
 
+static void reset_schedule(struct frame_interleave_s *f)
+{
+	f->next_ns = 0;
+}
+
 static const char *get_name(void *type_data)
 {
 	UNUSED_PARAMETER(type_data);
@@ -42,11 +47,31 @@ static void update(void *data, obs_data_t *settings)
 	struct frame_interleave_s *f = data;
 
 	f->interleave_ns = obs_data_get_int(settings, "interleave_ms") * MSEC_TO_NSEC;
+	reset_schedule(f);
+}
+
+static void activate(void *data)
+{
+	struct frame_interleave_s *f = data;
+
+	reset_schedule(f);
+}
+
+static void deactivate(void *data)
+{
+	struct frame_interleave_s *f = data;
+
+	reset_schedule(f);
 }
 
 static struct obs_source_frame *filter_video(void *data, struct obs_source_frame *frame)
 {
 	struct frame_interleave_s *f = data;
+
+	if (!obs_source_enabled(f->context)) {
+		reset_schedule(f);
+		return frame;
+	}
 
 	uint64_t ns = obs_get_video_frame_time();
 	obs_source_t *parent = obs_filter_get_parent(f->context);
@@ -105,5 +130,7 @@ const struct obs_source_info frame_interleave_filter_info = {
 	.update = update,
 	.get_properties = get_properties,
 	.get_defaults = get_defaults,
+	.activate = activate,
+	.deactivate = deactivate,
 	.filter_video = filter_video,
 };
